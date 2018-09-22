@@ -1,0 +1,10 @@
+﻿{
+  "Name": "Gift Advisor",
+  "Author": "Polymaker",
+  "Version": "1.0.0",
+  "Description": "A mod that gives info about giving gifts.",
+  "UniqueID": "Polymaker.GiftAdvisor",
+  "EntryDll": "GiftAdvisor.dll",
+  "MinimumApiVersion": "2.0",
+  "UpdateKeys": []
+}
