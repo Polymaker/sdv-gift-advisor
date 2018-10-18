@@ -63,8 +63,11 @@
   <ItemGroup>
     <Compile Include="API\IGameMenuExtenderAPI.cs" />
     <Compile Include="GiftAdvisorMod.cs" />
+    <Compile Include="GiftGivingAction.cs" />
     <Compile Include="GiftHelper.cs" />
     <Compile Include="GiftTaste.cs" />
+    <Compile Include="ItemDeliveryAction.cs" />
+    <Compile Include="ItemGivingAction.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UI\BestGiftsMenu.cs" />
   </ItemGroup>
