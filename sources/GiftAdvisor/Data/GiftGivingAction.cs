@@ -32,9 +32,13 @@ namespace GiftAdvisor
 
         public override string GetTooltipText()
         {
-            var text = Taste.ToString() + ": ";
-            text += (FriendshipAmount > 0 ? "+" : "") + $"{FriendshipAmount} Friendship";
-            return text;
+			var npcSocialData = Game1.player.friendshipData[TargetNPC.Name];
+			if (npcSocialData.GiftsToday > 0)
+				return $"You already gave a gift to {TargetNPC.Name} today";
+			else if (npcSocialData.GiftsThisWeek >= 2)
+				return $"You already gave two gifts to {TargetNPC.Name} this week";
+
+			return $"{Taste}: {FriendshipAmount:+#;-#;0} Friendship";
         }
     }
 }

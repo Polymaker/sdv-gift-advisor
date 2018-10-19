@@ -62,12 +62,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="API\IGameMenuExtenderAPI.cs" />
+    <Compile Include="Data\GameDate.cs" />
+    <Compile Include="Data\Season.cs" />
     <Compile Include="GiftAdvisorMod.cs" />
-    <Compile Include="GiftGivingAction.cs" />
-    <Compile Include="GiftHelper.cs" />
-    <Compile Include="GiftTaste.cs" />
-    <Compile Include="ItemDeliveryAction.cs" />
-    <Compile Include="ItemGivingAction.cs" />
+    <Compile Include="Data\GiftGivingAction.cs" />
+    <Compile Include="Helpers\GiftHelper.cs" />
+    <Compile Include="Data\GiftTaste.cs" />
+    <Compile Include="Data\ItemDeliveryAction.cs" />
+    <Compile Include="Data\ItemGivingAction.cs" />
+    <Compile Include="Helpers\WorldHelper.cs" />
+    <Compile Include="Modules\InventoryTracker.cs" />
+    <Compile Include="Modules\ItemGivingTracker.cs" />
+    <Compile Include="Modules\ModuleBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UI\BestGiftsMenu.cs" />
   </ItemGroup>
