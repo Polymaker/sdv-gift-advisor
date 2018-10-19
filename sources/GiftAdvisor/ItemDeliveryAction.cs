@@ -23,23 +23,24 @@ namespace GiftAdvisor
 		private ItemDeliveryAction(Quest quest, StardewValley.Object item, int quantity, NPC target) : base(item, target)
 		{
 			Quest = quest;
-			Quantity = quantity;
+            
+            Quantity = quantity;
 		}
 
 		public ItemDeliveryAction(ItemDeliveryQuest quest) 
-			: this(quest, quest.deliveryItem.Value, quest.number.Value, Game1.getCharacterFromName(quest.target.Value))
+			: this(quest, quest.deliveryItem.Value ?? new StardewValley.Object(quest.item.Value, 1), quest.number.Value, Game1.getCharacterFromName(quest.target.Value))
 		{
 
 		}
 
 		public ItemDeliveryAction(LostItemQuest quest) 
-			: this(quest, new StardewValley.Object(Vector2.Zero, quest.itemIndex.Value), 1, Game1.getCharacterFromName(quest.npcName.Value))
+			: this(quest, new StardewValley.Object(quest.itemIndex.Value, 1), 1, Game1.getCharacterFromName(quest.npcName.Value))
 		{
 
 		}
 
 		public ItemDeliveryAction(FishingQuest quest)
-			: this(quest, new StardewValley.Object(Vector2.Zero, quest.whichFish.Value), quest.numberToFish.Value, Game1.getCharacterFromName(quest.target.Value))
+			: this(quest, new StardewValley.Object(quest.whichFish.Value, 1), quest.numberToFish.Value, Game1.getCharacterFromName(quest.target.Value))
 		{
 
 		}
@@ -54,5 +55,10 @@ namespace GiftAdvisor
 
 			return item.Stack >= Quantity;
 		}
-	}
+
+        public override string GetTooltipText()
+        {
+            return $"{Quest.questTitle}: {Item.name} x{Quantity}";
+        }
+    }
 }

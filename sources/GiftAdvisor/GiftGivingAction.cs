@@ -29,5 +29,12 @@ namespace GiftAdvisor
 		{
 			FriendshipAmount = GiftHelper.GetGiftFriendshipValue(TargetNPC, Item);
 		}
-	}
+
+        public override string GetTooltipText()
+        {
+            var text = Taste.ToString() + ": ";
+            text += (FriendshipAmount > 0 ? "+" : "") + $"{FriendshipAmount} Friendship";
+            return text;
+        }
+    }
 }

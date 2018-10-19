@@ -13,6 +13,7 @@ namespace GiftAdvisor
 		public NPC TargetNPC { get; set; }
 		public abstract bool IsGift { get; }
 		public bool IsQuest => !IsGift;
+        public bool IsWithinRange { get; set; }
 
 		public ItemGivingAction(StardewValley.Object item, NPC target)
 		{
@@ -33,5 +34,7 @@ namespace GiftAdvisor
 		{
 			return item?.ParentSheetIndex == Item.ParentSheetIndex;
 		}
+
+        public abstract string GetTooltipText();
 	}
 }

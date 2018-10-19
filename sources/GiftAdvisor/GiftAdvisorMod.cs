@@ -16,10 +16,9 @@ namespace GiftAdvisor
     public class GiftAdvisorMod : Mod
     {
         private IGameMenuExtenderAPI MenuExtender;
-        private GiftGivingInfo CurrentGiftInfo;
 		private ItemGivingAction CurrentAction;
 		private List<ItemDeliveryAction> ActiveItemQuests;
-		//private List<GiftGivingAction> Gift
+        private List<GiftGivingAction> GiftList;
 
 		public override void Entry(IModHelper helper)
         {
@@ -28,12 +27,16 @@ namespace GiftAdvisor
             GraphicsEvents.OnPreRenderHudEvent += GraphicsEvents_OnPreRenderHudEvent;
 			TimeEvents.AfterDayStarted += TimeEvents_AfterDayStarted;
 			ActiveItemQuests = new List<ItemDeliveryAction>();
-		}
+            GiftList = new List<GiftGivingAction>();
+
+        }
 
 		private void TimeEvents_AfterDayStarted(object sender, EventArgs e)
 		{
 			UpdateActiveQuests();
-		}
+            GiftList.Clear();
+
+        }
 
 		class GiftGivingInfo
         {
@@ -67,30 +70,29 @@ namespace GiftAdvisor
 				else if (quest is FishingQuest fq)
 					ActiveItemQuests.Add(new ItemDeliveryAction(fq));
 			}
+
+            foreach (var q in ActiveItemQuests)
+                Monitor.Log($"Acitve Quest: \"{q.Quest.questTitle}\" NPC: {q.TargetNPC.Name} Item: {q.Item.name} x{q.Quantity} ");
 		}
 
         private void CheckCanGiftItem()
         {
-            var cursorPos = Helper.Input.GetCursorPosition();
-
+            
+            ItemGivingAction currentGiftAction = null;
+            
             if (Game1.player.ActiveObject != null && Game1.currentLocation != null)
             {
 				var heldObject = Game1.player.ActiveObject;
 
-				//if (CurrentGiftInfo != null && heldObject == CurrentGiftInfo.Gift)
-				//            {
-				//                var npcTile = CurrentGiftInfo.TargetNPC.getTileLocation();
-				//                if (npcTile.X == cursorPos.Tile.X && (npcTile.Y == cursorPos.Tile.Y || npcTile.Y + 1 == cursorPos.Tile.Y))
-				//                    return;
-				//            }
-				bool isGiftable = heldObject.canBeGivenAsGift();
+                bool isGiftable = heldObject.canBeGivenAsGift();
 				bool isQuestItem = heldObject.questItem.Value;
 
 				if (isGiftable || isQuestItem)
 				{
 					NPC targetNPC = null;
+                    var cursorPos = Helper.Input.GetCursorPosition();
 
-					if (Utility.checkForCharacterInteractionAtTile(cursorPos.Tile, Game1.player))
+                    if (Utility.checkForCharacterInteractionAtTile(cursorPos.Tile, Game1.player))
 						targetNPC = Game1.currentLocation.isCharacterAtTile(cursorPos.Tile);
 					else if (Utility.checkForCharacterInteractionAtTile(cursorPos.Tile + new Vector2(0f, 1f), Game1.player))
 						targetNPC = Game1.currentLocation.isCharacterAtTile(cursorPos.Tile + new Vector2(0f, 1f));
@@ -98,21 +100,31 @@ namespace GiftAdvisor
 					if (targetNPC != null)
 					{
 						var questItemAction = ActiveItemQuests.FirstOrDefault(q => q.CanCompleteDelivery(heldObject, targetNPC));
-						if (questItemAction != null)
-							CurrentAction = questItemAction;
-						else if (isGiftable)
-							CurrentAction = new GiftGivingAction(heldObject, targetNPC);
-						else
-							CurrentAction = null;
+
+                        if (questItemAction != null)
+                        {
+                            currentGiftAction = questItemAction;
+                        }
+                        else if (isGiftable)
+                        {
+                            var giftAction = GiftList.FirstOrDefault(g => g.Matches(heldObject, targetNPC));
+                            if (giftAction == null)
+                            {
+                                giftAction = new GiftGivingAction(heldObject, targetNPC);
+                                GiftList.Add(giftAction);
+                            }
+                            currentGiftAction = giftAction;
+                        }
 					}
-					else
-						CurrentGiftInfo = null;
 				}
-				else
-					CurrentGiftInfo = null;
             }
-            else if(CurrentGiftInfo != null)
-                CurrentGiftInfo = null;
+
+            CurrentAction = currentGiftAction;
+            if(CurrentAction != null)
+            {
+                var cursorPos = Helper.Input.GetCursorPosition();
+                CurrentAction.IsWithinRange = Utility.tileWithinRadiusOfPlayer((int)cursorPos.Tile.X, (int)cursorPos.Tile.Y, 1, Game1.player);
+            }
         }
 
         private void GameEvents_EighthUpdateTick(object sender, EventArgs e)
@@ -129,23 +141,12 @@ namespace GiftAdvisor
 
             if (CurrentAction != null)
             {
-				if (CurrentAction.IsGift)
-				{
-
-				}
-				else
-				{
-
-				}
-                var text = CurrentGiftInfo.Taste.ToString() + ": ";
-                text += (CurrentGiftInfo.FriendshipAmount > 0 ? "+" : "") + $"{CurrentGiftInfo.FriendshipAmount} Friendship";
-
                 IClickableMenu.drawHoverText(
-                               Game1.spriteBatch,
-                               text,
-                               Game1.smallFont,
-                               xOffset: 64,
-                               alpha: Game1.mouseCursorTransparency);
+                    Game1.spriteBatch,
+                    CurrentAction.GetTooltipText(),
+                    Game1.smallFont,
+                    xOffset: 64,
+                    alpha: CurrentAction.IsWithinRange ? 1f : 0.5f);
             }
         }
     }
