@@ -17,8 +17,8 @@ namespace GiftAdvisor
     public class GiftAdvisorMod : Mod
     {
         private IGameMenuExtenderAPI MenuExtender;
-		private InventoryTracker InventoryTrackerModule;
-		private ItemGivingTracker ItemGivingTrackerModule;
+		internal static InventoryTracker InventoryTrackerModule;
+        internal static ItemGivingTracker ItemGivingTrackerModule;
 
 		public override void Entry(IModHelper helper)
         {
@@ -36,7 +36,8 @@ namespace GiftAdvisor
 			else
 				Monitor.Log("GameMenuExtender is required for full experience!", LogLevel.Error);
 
-			InventoryTrackerModule.AttachGameEvents();
+            if (MenuExtender != null)
+                InventoryTrackerModule.AttachGameEvents();
 			ItemGivingTrackerModule.AttachGameEvents();
 		}
     }

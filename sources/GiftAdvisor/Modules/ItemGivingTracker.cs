@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
+using StardewValley.Menus;
 using StardewValley.Quests;
 
 namespace GiftAdvisor.Modules
@@ -29,15 +30,17 @@ namespace GiftAdvisor.Modules
 		{
 			TimeEvents.AfterDayStarted += TimeEvents_AfterDayStarted;
 			GameEvents.EighthUpdateTick += GameEvents_EighthUpdateTick;
-		}
+            GraphicsEvents.OnPostRenderEvent += GraphicsEvents_OnPostRenderEvent;
+        }
 
 		public override void DettachGameEvents()
 		{
 			TimeEvents.AfterDayStarted -= TimeEvents_AfterDayStarted;
 			GameEvents.EighthUpdateTick -= GameEvents_EighthUpdateTick;
-		}
+            GraphicsEvents.OnPostRenderEvent -= GraphicsEvents_OnPostRenderEvent;
+        }
 
-		private void TimeEvents_AfterDayStarted(object sender, EventArgs e)
+        private void TimeEvents_AfterDayStarted(object sender, EventArgs e)
 		{
 			PreviousGiftTentatives.Clear();
 			RefreshActiveItemQuests();
@@ -109,38 +112,37 @@ namespace GiftAdvisor.Modules
 								giftAction = new GiftGivingAction(heldObject, targetNPC);
 								PreviousGiftTentatives.Add(giftAction);
 							}
-							currentItemAction = giftAction;
+
+                            if (giftAction.CanGiveItem())
+                                currentItemAction = giftAction;
 						}
 					}
 
 					if (currentItemAction != null)
-						currentItemAction.IsWithinRange = Utility.tileWithinRadiusOfPlayer((int)cursorPos.Tile.X, (int)cursorPos.Tile.Y, 1, Game1.player);
+						currentItemAction.IsWithinRange = Utility.tileWithinRadiusOfPlayer(targetNPC.getTileX(), targetNPC.getTileY(), 1, Game1.player);
 				}
 			}
-
-			CurrentGivingAction = currentItemAction;
-
-			return CurrentGivingAction != null;
+            
+			return (CurrentGivingAction = currentItemAction) != null;
 		}
 
-		#region Rendering
+        #region Rendering
 
-		//private void GraphicsEvents_OnPreRenderHudEvent(object sender, EventArgs e)
-		//{
-		//    if (!Context.IsWorldReady)
-		//        return;
 
-		//    if (CurrentAction != null)
-		//    {
-		//        IClickableMenu.drawHoverText(
-		//            Game1.spriteBatch,
-		//            CurrentAction.GetTooltipText(),
-		//            Game1.smallFont,
-		//            xOffset: 64,
-		//            alpha: CurrentAction.IsWithinRange ? 1f : 0.5f);
-		//    }
-		//}
+        private void GraphicsEvents_OnPostRenderEvent(object sender, EventArgs e)
+        {
+            if (CurrentGivingAction != null)
+            {
+                IClickableMenu.drawHoverText(
+                    Game1.spriteBatch,
+                    CurrentGivingAction.GetTooltipText(),
+                    Game1.smallFont,
+                    xOffset: 64,
+                    yOffset: -16,
+                    alpha: CurrentGivingAction.IsWithinRange ? 1f : 0.75f);
+            }
+        }
 
-		#endregion
-	}
+        #endregion
+    }
 }

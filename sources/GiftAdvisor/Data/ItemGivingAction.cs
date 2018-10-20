@@ -36,5 +36,10 @@ namespace GiftAdvisor
 		}
 
         public abstract string GetTooltipText();
+
+        public virtual bool CanGiveItem()
+        {
+            return true;
+        }
 	}
 }

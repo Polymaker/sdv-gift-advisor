@@ -56,6 +56,13 @@ namespace GiftAdvisor
 			return item.Stack >= Quantity;
 		}
 
+        public override bool CanGiveItem()
+        {
+            if (Quest is FishingQuest fq)
+                return fq.numberFished.Value >= Quantity;
+            return base.CanGiveItem();
+        }
+
         public override string GetTooltipText()
         {
             return $"{Quest.questTitle}: {Item.name} x{Quantity}";

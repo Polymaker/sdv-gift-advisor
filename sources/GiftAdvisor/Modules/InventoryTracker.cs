@@ -27,30 +27,28 @@ namespace GiftAdvisor.Modules
 
 		public override void AttachGameEvents()
 		{
-			TimeEvents.AfterDayStarted += TimeEvents_AfterDayStarted;
 			SaveEvents.AfterLoad += SaveEvents_AfterLoad;
-			LocationEvents.ObjectsChanged += LocationEvents_ObjectsChanged;
+            SaveEvents.AfterReturnToTitle += SaveEvents_AfterReturnToTitle;
+            LocationEvents.ObjectsChanged += LocationEvents_ObjectsChanged;
 		}
 
 		public override void DettachGameEvents()
 		{
-			TimeEvents.AfterDayStarted -= TimeEvents_AfterDayStarted;
 			SaveEvents.AfterLoad -= SaveEvents_AfterLoad;
-			LocationEvents.ObjectsChanged -= LocationEvents_ObjectsChanged;
+            SaveEvents.AfterReturnToTitle -= SaveEvents_AfterReturnToTitle;
+            LocationEvents.ObjectsChanged -= LocationEvents_ObjectsChanged;
 		}
-
-		private void SaveEvents_AfterLoad(object sender, EventArgs e)
+        
+        private void SaveEvents_AfterLoad(object sender, EventArgs e)
 		{
 			InitializeInventoriesList();
 		}
 
-		private void TimeEvents_AfterDayStarted(object sender, EventArgs e)
-		{
-			//if (IsInitialized && InitializationDate != GameDate.Today)
-			//{
-
-			//}
-		}
+        private void SaveEvents_AfterReturnToTitle(object sender, EventArgs e)
+        {
+            IsInitialized = false;
+            Inventories.Clear();
+        }
 
 		private void LocationEvents_ObjectsChanged(object sender, EventArgsLocationObjectsChanged e)
 		{
@@ -91,6 +89,15 @@ namespace GiftAdvisor.Modules
 			IsInitialized = true;
 			//InitializationDate = GameDate.Today;
 		}
+
+        public IEnumerable<Item> GetAllItems()
+        {
+            foreach(var inventory in Inventories)
+            {
+                foreach(var item in inventory.Chest.items)
+                    yield return item;
+            }
+        }
 
 		private class InventoryLocation
 		{

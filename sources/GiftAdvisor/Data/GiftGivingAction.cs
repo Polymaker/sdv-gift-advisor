@@ -19,24 +19,24 @@ namespace GiftAdvisor
 			FriendshipAmount = GiftHelper.GetGiftFriendshipValue(target, item);
 		}
 
-		public bool CanGiveGift()
-		{
-			var npcSocialData = Game1.player.friendshipData[TargetNPC.Name];
-			return npcSocialData.GiftsToday == 0 && npcSocialData.GiftsThisWeek < 2;
-		}
+        public override bool CanGiveItem()
+        {
+            var npcSocialData = Game1.player.friendshipData[TargetNPC.Name];
+            return npcSocialData.GiftsToday == 0 && npcSocialData.GiftsThisWeek < 2;
+        }
 
-		public void RecalculateFriendshipAmount()
+        public void RecalculateFriendshipAmount()
 		{
 			FriendshipAmount = GiftHelper.GetGiftFriendshipValue(TargetNPC, Item);
 		}
 
         public override string GetTooltipText()
         {
-			var npcSocialData = Game1.player.friendshipData[TargetNPC.Name];
-			if (npcSocialData.GiftsToday > 0)
-				return $"You already gave a gift to {TargetNPC.Name} today";
-			else if (npcSocialData.GiftsThisWeek >= 2)
-				return $"You already gave two gifts to {TargetNPC.Name} this week";
+			//var npcSocialData = Game1.player.friendshipData[TargetNPC.Name];
+			//if (npcSocialData.GiftsToday > 0)
+			//	return $"You already gave a gift to {TargetNPC.Name} today";
+			//else if (npcSocialData.GiftsThisWeek >= 2)
+			//	return $"You already gave two gifts to {TargetNPC.Name} this week";
 
 			return $"{Taste}: {FriendshipAmount:+#;-#;0} Friendship";
         }
