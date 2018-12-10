@@ -22,23 +22,22 @@ namespace GiftAdvisor
 
 		public override void Entry(IModHelper helper)
         {
-            GameEvents.FirstUpdateTick += GameEvents_FirstUpdateTick;
-
+            Helper.Events.GameLoop.GameLaunched += GameLoop_GameLaunched;
 			InventoryTrackerModule = new InventoryTracker(this);
 			ItemGivingTrackerModule = new ItemGivingTracker(this);
 		}
 
-		private void GameEvents_FirstUpdateTick(object sender, EventArgs e)
-		{
-			MenuExtender = Helper.ModRegistry.GetApi<IGameMenuExtenderAPI>("Polymaker.GameMenuExtender");
-			if (MenuExtender != null)
-				MenuExtender.RegisterTabPageExtension("Social", "BestGiftsMenu", "Gift Advisor", typeof(UI.BestGiftsMenu));
-			else
-				Monitor.Log("GameMenuExtender is required for full experience!", LogLevel.Error);
+        private void GameLoop_GameLaunched(object sender, GameLaunchedEventArgs e)
+        {
+            MenuExtender = Helper.ModRegistry.GetApi<IGameMenuExtenderAPI>("Polymaker.GameMenuExtender");
+            if (MenuExtender != null)
+                MenuExtender.RegisterTabPageExtension("Social", "BestGiftsMenu", "Gift Advisor", typeof(UI.BestGiftsMenu));
+            else
+                Monitor.Log("GameMenuExtender is required for full experience!", LogLevel.Error);
 
             if (MenuExtender != null)
                 InventoryTrackerModule.AttachGameEvents();
-			ItemGivingTrackerModule.AttachGameEvents();
-		}
+            ItemGivingTrackerModule.AttachGameEvents();
+        }
     }
 }

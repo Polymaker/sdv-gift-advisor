@@ -27,47 +27,47 @@ namespace GiftAdvisor.Modules
 
 		public override void AttachGameEvents()
 		{
-			SaveEvents.AfterLoad += SaveEvents_AfterLoad;
-            SaveEvents.AfterReturnToTitle += SaveEvents_AfterReturnToTitle;
-            LocationEvents.ObjectsChanged += LocationEvents_ObjectsChanged;
+            Helper.Events.GameLoop.SaveLoaded += GameLoop_SaveLoaded;
+            Helper.Events.GameLoop.ReturnedToTitle += GameLoop_ReturnedToTitle;
+            Helper.Events.World.ObjectListChanged += World_ObjectListChanged;
 		}
 
-		public override void DettachGameEvents()
+        public override void DettachGameEvents()
 		{
-			SaveEvents.AfterLoad -= SaveEvents_AfterLoad;
-            SaveEvents.AfterReturnToTitle -= SaveEvents_AfterReturnToTitle;
-            LocationEvents.ObjectsChanged -= LocationEvents_ObjectsChanged;
-		}
+            Helper.Events.GameLoop.SaveLoaded -= GameLoop_SaveLoaded;
+            Helper.Events.GameLoop.ReturnedToTitle -= GameLoop_ReturnedToTitle;
+            Helper.Events.World.ObjectListChanged -= World_ObjectListChanged;
+        }
         
-        private void SaveEvents_AfterLoad(object sender, EventArgs e)
-		{
+        private void GameLoop_SaveLoaded(object sender, SaveLoadedEventArgs e)
+        {
 			InitializeInventoriesList();
 		}
 
-        private void SaveEvents_AfterReturnToTitle(object sender, EventArgs e)
+        private void GameLoop_ReturnedToTitle(object sender, ReturnedToTitleEventArgs e)
         {
             IsInitialized = false;
             Inventories.Clear();
         }
 
-		private void LocationEvents_ObjectsChanged(object sender, EventArgsLocationObjectsChanged e)
-		{
-			if (!IsInitialized)
-				return;
+        private void World_ObjectListChanged(object sender, ObjectListChangedEventArgs e)
+        {
+            if (!IsInitialized)
+                return;
 
-			foreach (var addedChest in e.Added.Where(x => x.Value is Chest))
-			{
-				if (!Inventories.Any(i => i.Tile == addedChest.Key && i.Location == e.Location))
-				{
-					Inventories.Add(new InventoryLocation((Chest)addedChest.Value, e.Location, addedChest.Key));
-				}
-			}
+            foreach (var addedChest in e.Added.Where(x => x.Value is Chest))
+            {
+                if (!Inventories.Any(i => i.Tile == addedChest.Key && i.Location == e.Location))
+                {
+                    Inventories.Add(new InventoryLocation((Chest)addedChest.Value, e.Location, addedChest.Key));
+                }
+            }
 
-			foreach (var removedChest in e.Removed.Where(x => x.Value is Chest))
-			{
-				Inventories.RemoveAll(i => i.Location == e.Location && i.Tile == removedChest.Key);
-			}
-		}
+            foreach (var removedChest in e.Removed.Where(x => x.Value is Chest))
+            {
+                Inventories.RemoveAll(i => i.Location == e.Location && i.Tile == removedChest.Key);
+            }
+        }
 
 		private void InitializeInventoriesList()
 		{

@@ -12,7 +12,7 @@ namespace GiftAdvisor.UI
     public class BestGiftsMenu : IClickableMenu
     {
 		private static List<GiftGivingAction> BestGiftsOfTheDay;
-		private static GameDate LastUpdated;
+		//private static GameDate LastUpdated;
 
 		static BestGiftsMenu()
 		{

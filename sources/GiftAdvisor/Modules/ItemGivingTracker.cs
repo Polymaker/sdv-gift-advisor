@@ -28,31 +28,34 @@ namespace GiftAdvisor.Modules
 
 		public override void AttachGameEvents()
 		{
-			TimeEvents.AfterDayStarted += TimeEvents_AfterDayStarted;
-			GameEvents.EighthUpdateTick += GameEvents_EighthUpdateTick;
-            GraphicsEvents.OnPostRenderEvent += GraphicsEvents_OnPostRenderEvent;
+            Helper.Events.GameLoop.DayStarted += GameLoop_DayStarted;
+            Helper.Events.GameLoop.UpdateTicked += GameLoop_UpdateTicked;
+            Helper.Events.Display.RenderedHud += Display_RenderedHud;
         }
 
-		public override void DettachGameEvents()
+        
+
+        public override void DettachGameEvents()
 		{
-			TimeEvents.AfterDayStarted -= TimeEvents_AfterDayStarted;
-			GameEvents.EighthUpdateTick -= GameEvents_EighthUpdateTick;
-            GraphicsEvents.OnPostRenderEvent -= GraphicsEvents_OnPostRenderEvent;
+            Helper.Events.GameLoop.DayStarted -= GameLoop_DayStarted;
+            Helper.Events.GameLoop.UpdateTicked -= GameLoop_UpdateTicked;
+            Helper.Events.Display.RenderedHud -= Display_RenderedHud;
         }
 
-        private void TimeEvents_AfterDayStarted(object sender, EventArgs e)
-		{
-			PreviousGiftTentatives.Clear();
-			RefreshActiveItemQuests();
-		}
+        private void GameLoop_DayStarted(object sender, DayStartedEventArgs e)
+        {
+            PreviousGiftTentatives.Clear();
+            RefreshActiveItemQuests();
+        }
 
-		private void GameEvents_EighthUpdateTick(object sender, EventArgs e)
-		{
-			if (!Context.IsWorldReady)
-				return;
+        private void GameLoop_UpdateTicked(object sender, UpdateTickedEventArgs e)
+        {
+            if (!Context.IsWorldReady)
+                return;
 
-			CheckCanGiveItem();
-		}
+            if (e.IsMultipleOf(8))
+                CheckCanGiveItem();
+        }
 
 		#endregion
 
@@ -128,8 +131,7 @@ namespace GiftAdvisor.Modules
 
         #region Rendering
 
-
-        private void GraphicsEvents_OnPostRenderEvent(object sender, EventArgs e)
+        private void Display_RenderedHud(object sender, RenderedHudEventArgs e)
         {
             if (CurrentGivingAction != null)
             {
