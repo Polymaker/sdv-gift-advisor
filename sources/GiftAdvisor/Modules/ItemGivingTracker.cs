@@ -33,8 +33,6 @@ namespace GiftAdvisor.Modules
             Helper.Events.Display.RenderedHud += Display_RenderedHud;
         }
 
-        
-
         public override void DettachGameEvents()
 		{
             Helper.Events.GameLoop.DayStarted -= GameLoop_DayStarted;
