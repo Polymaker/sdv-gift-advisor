@@ -15,19 +15,15 @@ namespace GiftAdvisor.UI
 {
     public class BestGiftsMenu : SdvForm//IClickableMenu
     {
-		private static List<GiftGivingAction> BestGiftsOfTheDay;
-        //private ClickableTextureComponent RefreshButton;
-        //private static GameDate LastUpdated;
         private SdvLabel FirstTabLabel;
         private SdvButton RefreshButton;
         private SdvContainer BestItemListView;
 
-		static BestGiftsMenu()
-		{
-			BestGiftsOfTheDay = new List<GiftGivingAction>();
-		}
+        private List<GiftGivingAction> BestGiftsOfTheDay => GiftAdvisorMod.ItemGivingTrackerModule.BestGiftsOfTheDay;
+        private int FirstColumnWidth = 280;
+        private int SecondColumnWidth = 120;
 
-		public BestGiftsMenu()
+        public BestGiftsMenu()
 		{
             IntiliazeMenu();
         }
@@ -39,92 +35,127 @@ namespace GiftAdvisor.UI
 
         private void IntiliazeMenu()
         {
-            //CalculateBestGifts();
-
-            //var textSize = Game1.smallFont.MeasureString("Refresh");
-            //RefreshButton = new ClickableTextureComponent("Refresh",
-            //    new Rectangle(xPositionOnScreen + width - 44 - (int)textSize.X - 32, yPositionOnScreen + 100,
-            //    (int)textSize.X + 32, (int)textSize.Y + 16),
-            //    "Refresh", null, Game1.mouseCursors, new Rectangle(432, 439, 9, 9), 4f, false)
-            //{
-            //};
             RefreshButton = new SdvButton() { Text = "Refresh", Font = Game1.smallFont };
-            RefreshButton.X = Width - RefreshButton.Width - GameMenuPadding.Right;
-            RefreshButton.Y = GameMenuPadding.Top + 20;
+            RefreshButton.X = Width - RefreshButton.Width - GameMenuPadding.Right - GAME_MENU_BORDER - 8;
+            RefreshButton.Y = GameMenuPadding.Top + GAME_MENU_BORDER + 8;
+            RefreshButton.MouseClick += RefreshButton_MouseClick;
 
             FirstTabLabel = new SdvLabel() { Text = "Best all-around gifts", Font = Game1.dialogueFont };
-            FirstTabLabel.X = GameMenuPadding.Left + 20;
-            FirstTabLabel.Y = GameMenuPadding.Top + 20;
+            FirstTabLabel.X = GameMenuPadding.Left + GAME_MENU_BORDER + 8;
+            FirstTabLabel.Y = GameMenuPadding.Top + GAME_MENU_BORDER + 8;
+
+            var itemLabel = new SdvLabel() { Text = "Item", X = FirstTabLabel.X, Y = FirstTabLabel.Bounds.Bottom + 16 };
+            var qualityLabel = new SdvLabel() { Text = "Quality", X = itemLabel.X + FirstColumnWidth, Y = itemLabel.Y};
+            var friendshipLabel = new SdvLabel() { Text = "Avg. Friendship", X = qualityLabel.X + SecondColumnWidth, Y = itemLabel.Y };
+
+            Controls.Add(itemLabel);
+            Controls.Add(qualityLabel);
+            Controls.Add(friendshipLabel);
 
 
             BestItemListView = new SdvContainer()
             {
                 X = GameMenuPadding.Left + GAME_MENU_BORDER,
-                Y = GameMenuPadding.Top + 100,
-                Width = Width - GameMenuPadding.Horizontal - GAME_MENU_BORDER * 2
-            };
+                Y = itemLabel.Bounds.Bottom + 8,
+                Width = Width - GameMenuPadding.Horizontal - (GAME_MENU_BORDER * 2) - 8
+            }; 
 
             BestItemListView.Height = Height - BestItemListView.Y - GAME_MENU_BORDER - GameMenuPadding.Bottom;
-            BestItemListView.Controls.Add(new SdvButton() { Text = "Hello" });
-            BestItemListView.Controls.Add(new SdvButton() { Text = "World", X = 100, Y = 600 });
+
+            var itemHeight = (int)Game1.smallFont.MeasureString("Test").Y + 8;
+
+            BestItemListView.Padding = new Padding(8, 0, 0, itemHeight);
+
+            BestItemListView.VScrollBar.SmallChange = itemHeight / 2;
+            BestItemListView.VScrollBar.LargeChange = itemHeight;
+            BestItemListView.VScrollBar.WheelScrollLarge = true;
 
             Controls.Add(RefreshButton);
             Controls.Add(FirstTabLabel);
             Controls.Add(BestItemListView);
+
+            UpdateBestGiftList();
         }
 
-        public override void draw(SpriteBatch b)
+        private void UpdateBestGiftList()
         {
-            base.draw(b);
-        }
+            BestItemListView.Controls.Clear();
 
-        //public override void draw(SpriteBatch b)
-        //{
-        //    base.draw(b);
-        //    Utility.drawTextWithShadow(b, "Best all-around gifts", Game1.dialogueFont, new Vector2(xPositionOnScreen + 40, yPositionOnScreen + 100), Game1.textColor);
+            var groupedItems = BestGiftsOfTheDay.GroupBy(i => new { i.Item.ParentSheetIndex, i.Item.Quality }).OrderByDescending(g => g.Average(x => x.FriendshipAmount));
 
-        //    drawTextureBox(b, RefreshButton.texture, RefreshButton.sourceRect,
-        //        RefreshButton.bounds.X, RefreshButton.bounds.Y, RefreshButton.bounds.Width, RefreshButton.bounds.Height, Color.White, RefreshButton.scale, true);
-        //    Utility.drawTextWithShadow(b, RefreshButton.label, 
-        //        Game1.smallFont, new Vector2((float)RefreshButton.bounds.Center.X, (float)(RefreshButton.bounds.Center.Y + 4)) - Game1.smallFont.MeasureString(RefreshButton.label) / 2f, Game1.textColor, 1f, -1f, -1, -1, 0f, 3);
+            int currentY = 0;
 
-        //}
-
-        private void CalculateBestGifts()
-		{
-            //if(LastUpdated == GameDate.MinDate || GameDate.Today != LastUpdated)
-            //{
-            //	BestGiftsOfTheDay.Clear();
-            //             var giftableItems = GiftAdvisorMod.InventoryTrackerModule.GetAllItems().Where(i => i.canBeGivenAsGift()).ToList();
-            //	LastUpdated = GameDate.Today;
-            //}
-            BestGiftsOfTheDay.Clear();
-
-            if(GiftAdvisorMod.InventoryTrackerModule != null)
+            foreach (var itemGroup in groupedItems.Take(30))
             {
-                var allGiftableItems = GiftAdvisorMod.InventoryTrackerModule.GetAllItems().OfType<StardewValley.Object>().Where(i => i.canBeGivenAsGift());
-                var groupedItems = allGiftableItems.GroupBy(i => new { i.ParentSheetIndex, i.Quality });
+                var item = itemGroup.First().Item;
+                var averageFriendShip = (int)Math.Round(itemGroup.Average(x => x.FriendshipAmount));
+                if (averageFriendShip <= 10)
+                    break;
 
-                foreach (var npc in Utility.getAllCharacters())
+                Rectangle imageSourceRect;
+                Texture2D imageTexture;
+
+                if (item.bigCraftable.Value)
                 {
-                    if (!npc.IsGiftable())
-                        continue;
-                    var giftsForNpc = new List<GiftGivingAction>();
-
-                    foreach(var item in groupedItems)
-                    {
-                        giftsForNpc.Add(new GiftGivingAction(new StardewValley.Object(item.Key.ParentSheetIndex, 1, quality: item.Key.Quality), npc));
-                    }
-                    BestGiftsOfTheDay.AddRange(giftsForNpc.OrderByDescending(g => g.FriendshipAmount).Take(10));
+                    imageSourceRect = StardewValley.Object.getSourceRectForBigCraftable(item.ParentSheetIndex);
+                    imageTexture = Game1.bigCraftableSpriteSheet;
+                }
+                else
+                {
+                    imageSourceRect = Game1.getSourceRectForStandardTileSheet(Game1.objectSpriteSheet, item.ParentSheetIndex, 16, 16);
+                    imageTexture = Game1.objectSpriteSheet;
                 }
 
-                //BestGiftsOfTheDay = BestGiftsOfTheDay.OrderBy(g => g.TargetNPC.Name).ThenByDescending(g => g.FriendshipAmount).ToList();
-
-                foreach (var npcGifts in BestGiftsOfTheDay.GroupBy(g => g.TargetNPC.Name).OrderByDescending(g => g.Max(i => i.FriendshipAmount)))
+                var itemLabel = new SdvLabel()
                 {
-                    GiftAdvisorMod.InventoryTrackerModule.Monitor.Log($"Best gifts for {npcGifts.Key}: " + string.Join(", ", npcGifts.Take(3).Select(g => $"{g.Item.Name} {g.FriendshipAmount:+#;-#;0}")));
-                }
+                    Text = $"{item.Name}",
+                    X = 0,
+                    Y = currentY,
+                    Image = new SdvImage(imageTexture, imageSourceRect, 2f),
+                    TextImageRelation = TextImageRelation.ImageBeforeText,
+                    ImageAlign = ContentAlignment.MiddleCenter,
+                    TextAlign = ContentAlignment.MiddleLeft,
+                    TextImageSpacing = 8
+                };
+                
+                BestItemListView.Controls.Add(itemLabel);
+
+                var qualityLabel = new SdvLabel() { Text = $"{GetQualityName(itemGroup.Key.Quality)}" };
+                qualityLabel.X = FirstColumnWidth + 20;
+                qualityLabel.Y = currentY + (itemLabel.Height - qualityLabel.Height) / 2;
+
+                BestItemListView.Controls.Add(qualityLabel);
+
+                var friendShipLabel = new SdvLabel() { Text = $"{averageFriendShip}" };
+                friendShipLabel.X = FirstColumnWidth + SecondColumnWidth + 20;
+                friendShipLabel.Y = currentY + (itemLabel.Height - friendShipLabel.Height) / 2;
+
+                BestItemListView.Controls.Add(friendShipLabel);
+
+                currentY += itemLabel.Height + 8;
             }
         }
-	}
+        
+        private void RefreshButton_MouseClick(object sender, MouseEventArgs e)
+        {
+            GiftAdvisorMod.ItemGivingTrackerModule.CalculateBestGifts();
+            UpdateBestGiftList();
+        }
+
+        private string GetQualityName(int quality)
+        {
+            switch (quality)
+            {
+                default:
+                case 0:
+                    return string.Empty;
+                case 1:
+                    return "Silver";
+                case 2:
+                    return "Gold";
+                case 4:
+                    return "Iridium";
+            }
+        }
+    }
 }
