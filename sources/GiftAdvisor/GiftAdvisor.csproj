@@ -51,8 +51,7 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Polymaker.SdvUI, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="Polymaker.SdvUI">
       <HintPath>..\..\..\sdv-gui-library\sources\Polymaker.SdvUI\bin\x86\Debug\Polymaker.SdvUI.dll</HintPath>
     </Reference>
     <Reference Include="System" />

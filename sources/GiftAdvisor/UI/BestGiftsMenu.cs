@@ -17,7 +17,7 @@ namespace GiftAdvisor.UI
     {
         private SdvLabel FirstTabLabel;
         private SdvButton RefreshButton;
-        private SdvContainer BestItemListView;
+        private SdvScrollableControl BestItemListView;
 
         private List<GiftGivingAction> BestGiftsOfTheDay => GiftAdvisorMod.ItemGivingTrackerModule.BestGiftsOfTheDay;
         private int FirstColumnWidth = 280;
@@ -53,7 +53,7 @@ namespace GiftAdvisor.UI
             Controls.Add(friendshipLabel);
 
 
-            BestItemListView = new SdvContainer()
+            BestItemListView = new SdvScrollableControl()
             {
                 X = GameMenuPadding.Left + GAME_MENU_BORDER,
                 Y = itemLabel.Bounds.Bottom + 8,
