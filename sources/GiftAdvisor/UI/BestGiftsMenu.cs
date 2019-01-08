@@ -69,11 +69,14 @@ namespace GiftAdvisor.UI
             BestItemListView.VScrollBar.SmallChange = itemHeight / 2;
             BestItemListView.VScrollBar.LargeChange = itemHeight;
             BestItemListView.VScrollBar.WheelScrollLarge = true;
+            //BestItemListView.HScrollBar.BackColor = Color.Red;
+            //BestItemListView.VScrollBar.BackColor = Color.Red;
 
             Controls.Add(RefreshButton);
             Controls.Add(FirstTabLabel);
             Controls.Add(BestItemListView);
 
+            
             UpdateBestGiftList();
         }
 
